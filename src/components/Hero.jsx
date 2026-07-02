@@ -274,21 +274,21 @@ export default function Hero() {
             Explore Courses
           </button>
         </div>
+      </div>
 
-        {/* Language Strip bottom */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 text-xs md:text-sm text-gray-500 uppercase tracking-widest font-display">
-          <span>English</span>
-          <span className="text-blue-500">•</span>
-          <span>German</span>
-          <span className="text-blue-500">•</span>
-          <span>French</span>
-          <span className="text-blue-500">•</span>
-          <span>Spanish</span>
-          <span className="text-blue-500">•</span>
-          <span>Russian</span>
-          <span className="text-blue-500">•</span>
-          <span>Italian</span>
-        </div>
+      {/* Language Strip bottom */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 text-xs md:text-sm text-gray-500 uppercase tracking-widest font-display z-10">
+        <span>English</span>
+        <span className="text-blue-500">•</span>
+        <span>German</span>
+        <span className="text-blue-500">•</span>
+        <span>French</span>
+        <span className="text-blue-500">•</span>
+        <span>Spanish</span>
+        <span className="text-blue-500">•</span>
+        <span>Russian</span>
+        <span className="text-blue-500">•</span>
+        <span>Italian</span>
       </div>
     </section>
   );
