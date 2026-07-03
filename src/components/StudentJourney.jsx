@@ -82,19 +82,23 @@ export default function StudentJourney() {
     );
 
     // Timeline nodes activation triggers
-    stepRefs.current.forEach((step) => {
+    stepRefs.current.forEach((step, idx) => {
       const circle = step.querySelector(".step-circle");
-      const icon = step.querySelector(".step-icon");
       const content = step.querySelector(".step-content");
+      
+      const isEven = idx % 2 === 0;
+      // On mobile, always slide from the right side because content is left-aligned
+      const startX = isEven && window.innerWidth > 768 ? -80 : 80;
 
-      // Animate opacity and scale of the elements
+      // 1. Pop the circle node with bounce
       gsap.fromTo(
-        [circle, icon, content],
-        { opacity: 0.25, scale: 0.95 },
+        circle,
+        { opacity: 0, scale: 0 },
         {
           opacity: 1,
           scale: 1,
-          duration: 0.5,
+          duration: 0.6,
+          ease: "back.out(1.2)",
           scrollTrigger: {
             trigger: step,
             start: "top 75%",
@@ -103,7 +107,24 @@ export default function StudentJourney() {
         }
       );
 
-      // Animate active border glow for the circle node
+      // 2. Slide the content card in horizontally
+      gsap.fromTo(
+        content,
+        { opacity: 0, x: startX },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.7,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: step,
+            start: "top 75%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+
+      // 3. Animate active border glow for the circle node
       gsap.fromTo(
         circle,
         { borderColor: "rgba(255, 255, 255, 0.1)", boxShadow: "none" },
