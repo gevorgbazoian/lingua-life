@@ -18,28 +18,38 @@ export default function Stats() {
     const container = containerRef.current;
     if (!container) return;
 
-    const counters = container.querySelectorAll(".counter-value");
+    let ctx;
+    const timer = setTimeout(() => {
+      ctx = gsap.context(() => {
+        const counters = container.querySelectorAll(".counter-value");
 
-    counters.forEach((counter) => {
-      const targetVal = parseInt(counter.getAttribute("data-target"), 10);
-      const obj = { value: 0 };
+        counters.forEach((counter) => {
+          const targetVal = parseInt(counter.getAttribute("data-target"), 10);
+          const obj = { value: 0 };
 
-      gsap.to(obj, {
-        value: targetVal,
-        duration: 2.2,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: counter,
-          start: "top 85%",
-          toggleActions: "play none none none"
-        },
-        onUpdate: () => {
-          if (counter) {
-            counter.textContent = Math.floor(obj.value).toLocaleString();
-          }
-        }
-      });
-    });
+          gsap.to(obj, {
+            value: targetVal,
+            duration: 2.2,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: counter,
+              start: "top 85%",
+              toggleActions: "play none none none"
+            },
+            onUpdate: () => {
+              if (counter) {
+                counter.textContent = Math.floor(obj.value).toLocaleString();
+              }
+            }
+          });
+        });
+      }, container);
+    }, 1200);
+
+    return () => {
+      clearTimeout(timer);
+      if (ctx) ctx.revert();
+    };
   }, []);
 
   return (

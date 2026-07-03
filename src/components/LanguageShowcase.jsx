@@ -91,80 +91,76 @@ export default function LanguageShowcase() {
     const wrapper = wrapperRef.current;
     if (!track || !wrapper) return;
 
-    // Calculate total horizontal scroll width
-    const totalScrollWidth = track.scrollWidth - window.innerWidth;
+    let ctx;
+    const timer = setTimeout(() => {
+      ctx = gsap.context(() => {
+        // Calculate total horizontal scroll width
+        const totalScrollWidth = track.scrollWidth - window.innerWidth;
 
-    const scrollTween = gsap.to(track, {
-      x: -totalScrollWidth,
-      ease: "none",
-      scrollTrigger: {
-        trigger: wrapper,
-        pin: true,
-        scrub: 1,
-        start: "top top",
-        end: () => `+=${track.scrollWidth}`,
-        invalidateOnRefresh: true,
-      }
-    });
-
-    // 3D Card Hover Tilts
-    cardRefs.current.forEach((card) => {
-      if (!card) return;
-
-      const onMouseMove = (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        // Calculate normalized values (-0.5 to 0.5)
-        const xc = x / rect.width - 0.5;
-        const yc = y / rect.height - 0.5;
-
-        gsap.to(card.querySelector(".card-inner"), {
-          rotateY: xc * 20, // 20deg max
-          rotateX: -yc * 20,
-          duration: 0.3,
-          ease: "power2.out"
+        gsap.to(track, {
+          x: -totalScrollWidth,
+          ease: "none",
+          scrollTrigger: {
+            trigger: wrapper,
+            pin: true,
+            scrub: 1,
+            start: "top top",
+            end: () => `+=${track.scrollWidth}`,
+            invalidateOnRefresh: true,
+          }
         });
 
-        // Parallax gloss glow movement
-        gsap.to(card.querySelector(".card-glow"), {
-          x: xc * 100,
-          y: yc * 100,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-      };
+        // 3D Card Hover Tilts
+        cardRefs.current.forEach((card) => {
+          if (!card) return;
 
-      const onMouseLeave = () => {
-        gsap.to(card.querySelector(".card-inner"), {
-          rotateY: 0,
-          rotateX: 0,
-          duration: 0.6,
-          ease: "power3.out"
-        });
-        gsap.to(card.querySelector(".card-glow"), {
-          x: 0,
-          y: 0,
-          duration: 0.6,
-          ease: "power3.out"
-        });
-      };
+          const onMouseMove = (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
 
-      card.addEventListener("mousemove", onMouseMove);
-      card.addEventListener("mouseleave", onMouseLeave);
+            const xc = x / rect.width - 0.5;
+            const yc = y / rect.height - 0.5;
 
-      return () => {
-        card.removeEventListener("mousemove", onMouseMove);
-        card.removeEventListener("mouseleave", onMouseLeave);
-      };
-    });
+            gsap.to(card.querySelector(".card-inner"), {
+              rotateY: xc * 20,
+              rotateX: -yc * 20,
+              duration: 0.3,
+              ease: "power2.out"
+            });
+
+            gsap.to(card.querySelector(".card-glow"), {
+              x: xc * 100,
+              y: yc * 100,
+              duration: 0.3,
+              ease: "power2.out"
+            });
+          };
+
+          const onMouseLeave = () => {
+            gsap.to(card.querySelector(".card-inner"), {
+              rotateY: 0,
+              rotateX: 0,
+              duration: 0.6,
+              ease: "power3.out"
+            });
+            gsap.to(card.querySelector(".card-glow"), {
+              x: 0,
+              y: 0,
+              duration: 0.6,
+              ease: "power3.out"
+            });
+          };
+
+          card.addEventListener("mousemove", onMouseMove);
+          card.addEventListener("mouseleave", onMouseLeave);
+        });
+      }, wrapper);
+    }, 1200);
 
     return () => {
-      scrollTween.kill();
-      ScrollTrigger.getAll().forEach((t) => {
-        if (t.trigger === wrapper) t.kill();
-      });
+      clearTimeout(timer);
+      if (ctx) ctx.revert();
     };
   }, []);
 

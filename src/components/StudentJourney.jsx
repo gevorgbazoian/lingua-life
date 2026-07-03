@@ -65,82 +65,91 @@ export default function StudentJourney() {
     const container = containerRef.current;
     if (!line || !container) return;
 
-    // Timeline line progress animation
-    gsap.fromTo(
-      line,
-      { scaleY: 0 },
-      {
-        scaleY: 1,
-        ease: "none",
-        scrollTrigger: {
-          trigger: container,
-          start: "top 40%",
-          end: "bottom 60%",
-          scrub: true,
-        }
-      }
-    );
-
-    // Timeline nodes activation triggers
-    stepRefs.current.forEach((step, idx) => {
-      const circle = step.querySelector(".step-circle");
-      const content = step.querySelector(".step-content");
-      
-      const isEven = idx % 2 === 0;
-      // On mobile, always slide from the right side because content is left-aligned
-      const startX = isEven && window.innerWidth > 768 ? -80 : 80;
-
-      // 1. Pop the circle node with bounce
-      gsap.fromTo(
-        circle,
-        { opacity: 0, scale: 0 },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 0.6,
-          ease: "back.out(1.2)",
-          scrollTrigger: {
-            trigger: step,
-            start: "top 75%",
-            toggleActions: "play none none reverse"
+    let ctx;
+    const timer = setTimeout(() => {
+      ctx = gsap.context(() => {
+        // Timeline line progress animation
+        gsap.fromTo(
+          line,
+          { scaleY: 0 },
+          {
+            scaleY: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: container,
+              start: "top 40%",
+              end: "bottom 60%",
+              scrub: true,
+            }
           }
-        }
-      );
+        );
 
-      // 2. Slide the content card in horizontally
-      gsap.fromTo(
-        content,
-        { opacity: 0, x: startX },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.7,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: step,
-            start: "top 75%",
-            toggleActions: "play none none reverse"
-          }
-        }
-      );
+        // Timeline nodes activation triggers
+        stepRefs.current.forEach((step, idx) => {
+          const circle = step.querySelector(".step-circle");
+          const content = step.querySelector(".step-content");
+          
+          const isEven = idx % 2 === 0;
+          // On mobile, always slide from the right side because content is left-aligned
+          const startX = isEven && window.innerWidth > 768 ? -80 : 80;
 
-      // 3. Animate active border glow for the circle node
-      gsap.fromTo(
-        circle,
-        { borderColor: "rgba(255, 255, 255, 0.1)", boxShadow: "none" },
-        {
-          borderColor: "rgba(96, 165, 250, 0.5)",
-          boxShadow: "0 0 15px rgba(96, 165, 250, 0.3)",
-          duration: 0.5,
-          scrollTrigger: {
-            trigger: step,
-            start: "top 75%",
-            toggleActions: "play none none reverse"
-          }
-        }
-      );
-    });
+          // 1. Pop the circle node with bounce
+          gsap.fromTo(
+            circle,
+            { opacity: 0, scale: 0 },
+            {
+              opacity: 1,
+              scale: 1,
+              duration: 0.6,
+              ease: "back.out(1.2)",
+              scrollTrigger: {
+                trigger: step,
+                start: "top 75%",
+                toggleActions: "play none none reverse"
+              }
+            }
+          );
 
+          // 2. Slide the content card in horizontally
+          gsap.fromTo(
+            content,
+            { opacity: 0, x: startX },
+            {
+              opacity: 1,
+              x: 0,
+              duration: 0.7,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: step,
+                start: "top 75%",
+                toggleActions: "play none none reverse"
+              }
+            }
+          );
+
+          // 3. Animate active border glow for the circle node
+          gsap.fromTo(
+            circle,
+            { borderColor: "rgba(255, 255, 255, 0.1)", boxShadow: "none" },
+            {
+              borderColor: "rgba(96, 165, 250, 0.5)",
+              boxShadow: "0 0 15px rgba(96, 165, 250, 0.3)",
+              duration: 0.5,
+              scrollTrigger: {
+                trigger: step,
+                start: "top 75%",
+                toggleActions: "play none none reverse"
+              }
+            }
+          );
+        });
+      }, container);
+    }, 1200);
+
+    return () => {
+      clearTimeout(timer);
+      if (ctx) ctx.revert();
+    };
   }, []);
 
   return (

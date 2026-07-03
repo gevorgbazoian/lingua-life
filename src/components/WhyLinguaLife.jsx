@@ -87,59 +87,68 @@ export default function WhyLinguaLife() {
   const graphicGroupRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  // 1. Initialize ScrollTrigger pinning once on mount (delayed to sync with preloader)
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Pinning container
-    const scrollTrigger = ScrollTrigger.create({
-      trigger: container,
-      start: "top top",
-      end: "+=3500",
-      pin: true,
-      scrub: 0.5,
-      onUpdate: (self) => {
-        const progress = self.progress;
-        const index = Math.min(
-          FRAMES.length - 1,
-          Math.floor(progress * FRAMES.length)
-        );
-        setActiveIndex(index);
-      }
-    });
+    let scrollTrigger;
+    let ctx;
 
-    // GSAP animations to fade elements in/out
+    const timer = setTimeout(() => {
+      ctx = gsap.context(() => {
+        scrollTrigger = ScrollTrigger.create({
+          trigger: container,
+          start: "top top",
+          end: "+=3500",
+          pin: true,
+          scrub: 0.5,
+          onUpdate: (self) => {
+            const progress = self.progress;
+            const index = Math.min(
+              FRAMES.length - 1,
+              Math.floor(progress * FRAMES.length)
+            );
+            setActiveIndex(index);
+          }
+        });
+      }, container);
+    }, 1200);
+
+    return () => {
+      clearTimeout(timer);
+      if (scrollTrigger) scrollTrigger.kill();
+      if (ctx) ctx.revert();
+    };
+  }, []);
+
+  // 2. Animate slide transitions when activeIndex changes
+  useEffect(() => {
     const slides = textGroupRef.current?.children;
     const graphics = graphicGroupRef.current?.children;
 
-    if (slides && graphics) {
-      // Setup initial states
-      gsap.set(slides, { opacity: 0, y: 50, display: "none" });
-      gsap.set(graphics, { opacity: 0, scale: 0.8, display: "none" });
+    if (slides && graphics && slides[activeIndex] && graphics[activeIndex]) {
+      // Hide other slides
+      gsap.to(slides, { opacity: 0, y: 15, display: "none", duration: 0.2 });
+      gsap.to(graphics, { opacity: 0, scale: 0.9, display: "none", duration: 0.2 });
 
       // Animate active slide in
-      gsap.killTweensOf([slides, graphics]);
-      
       gsap.set(slides[activeIndex], { display: "block" });
       gsap.to(slides[activeIndex], {
         opacity: 1,
         y: 0,
-        duration: 0.6,
-        ease: "power3.out"
+        duration: 0.4,
+        ease: "power2.out"
       });
 
       gsap.set(graphics[activeIndex], { display: "block" });
       gsap.to(graphics[activeIndex], {
         opacity: 1,
         scale: 1,
-        duration: 0.6,
+        duration: 0.5,
         ease: "back.out(1.1)"
       });
     }
-
-    return () => {
-      scrollTrigger.kill();
-    };
   }, [activeIndex]);
 
   return (
