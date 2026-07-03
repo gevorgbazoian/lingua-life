@@ -16,12 +16,9 @@ export default function CustomCursor() {
     setIsVisible(true);
     document.documentElement.classList.add("custom-cursor-active");
 
-    const dot = cursorDotRef.current;
-    const globe = cursorGlobeRef.current;
-
-    const mouse = { x: 0, y: 0 };
-    const dotPos = { x: 0, y: 0 };
-    const globePos = { x: 0, y: 0 };
+    const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    const dotPos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    const globePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
     const onMouseMove = (e) => {
       mouse.x = e.clientX;
@@ -33,6 +30,9 @@ export default function CustomCursor() {
     // Ultra smooth requestAnimationFrame loop (No CSS transition conflicts)
     let frameId;
     const update = () => {
+      const dot = cursorDotRef.current;
+      const globe = cursorGlobeRef.current;
+
       // Small dot follows mouse closely
       dotPos.x += (mouse.x - dotPos.x) * 0.25;
       dotPos.y += (mouse.y - dotPos.y) * 0.25;
@@ -91,10 +91,8 @@ export default function CustomCursor() {
     };
   }, []);
 
-  if (!isVisible) return null;
-
   return (
-    <>
+    <div style={{ opacity: isVisible ? 1 : 0, transition: "opacity 0.4s ease" }}>
       {/* Tiny Core Dot Tracking Wrapper */}
       <div
         ref={cursorDotRef}
@@ -142,6 +140,6 @@ export default function CustomCursor() {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }

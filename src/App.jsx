@@ -40,6 +40,16 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!loading) {
+      // Delay slightly so that the loader exit animation is done and layout is stable
+      const timer = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
   return (
     <BrowserRouter>
       {/* 1. Multilingual Page Entry Preloader */}
