@@ -87,6 +87,7 @@ export default function StudentJourney() {
       const icon = step.querySelector(".step-icon");
       const content = step.querySelector(".step-content");
 
+      // Animate opacity and scale of the elements
       gsap.fromTo(
         [circle, icon, content],
         { opacity: 0.25, scale: 0.95 },
@@ -96,9 +97,24 @@ export default function StudentJourney() {
           duration: 0.5,
           scrollTrigger: {
             trigger: step,
-            start: "top 50%",
-            end: "bottom 50%",
-            toggleActions: "play reverse play reverse"
+            start: "top 75%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+
+      // Animate active border glow for the circle node
+      gsap.fromTo(
+        circle,
+        { borderColor: "rgba(255, 255, 255, 0.1)", boxShadow: "none" },
+        {
+          borderColor: "rgba(96, 165, 250, 0.5)",
+          boxShadow: "0 0 15px rgba(96, 165, 250, 0.3)",
+          duration: 0.5,
+          scrollTrigger: {
+            trigger: step,
+            start: "top 75%",
+            toggleActions: "play none none reverse"
           }
         }
       );

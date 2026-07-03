@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
 
 export default function CustomCursor() {
   const cursorDotRef = useRef(null);
@@ -20,12 +19,6 @@ export default function CustomCursor() {
     const dot = cursorDotRef.current;
     const globe = cursorGlobeRef.current;
 
-    // Use GSAP quickSetter for ultra-smooth rendering
-    const setDotX = gsap.quickSetter(dot, "x", "px");
-    const setDotY = gsap.quickSetter(dot, "y", "px");
-    const setGlobeX = gsap.quickSetter(globe, "x", "px");
-    const setGlobeY = gsap.quickSetter(globe, "y", "px");
-
     const mouse = { x: 0, y: 0 };
     const dotPos = { x: 0, y: 0 };
     const globePos = { x: 0, y: 0 };
@@ -37,22 +30,26 @@ export default function CustomCursor() {
 
     window.addEventListener("mousemove", onMouseMove);
 
-    // Animation loop for custom physics lag effect
-    const ticker = (time, ease) => {
+    // Ultra smooth requestAnimationFrame loop
+    let frameId;
+    const update = () => {
       // Small dot follows mouse closely
       dotPos.x += (mouse.x - dotPos.x) * 0.25;
       dotPos.y += (mouse.y - dotPos.y) * 0.25;
-      setDotX(dotPos.x);
-      setDotY(dotPos.y);
+      if (dot) {
+        dot.style.transform = `translate3d(${dotPos.x}px, ${dotPos.y}px, 0) translate(-50%, -50%)`;
+      }
 
-      // Globe trailing with more lag
-      globePos.x += (mouse.x - globePos.x) * 0.1;
-      globePos.y += (mouse.y - globePos.y) * 0.1;
-      setGlobeX(globePos.x);
-      setGlobeY(globePos.y);
+      // Globe trailing with lag
+      globePos.x += (mouse.x - globePos.x) * 0.12;
+      globePos.y += (mouse.y - globePos.y) * 0.12;
+      if (globe) {
+        globe.style.transform = `translate3d(${globePos.x}px, ${globePos.y}px, 0) translate(-50%, -50%)`;
+      }
+
+      frameId = requestAnimationFrame(update);
     };
-
-    gsap.ticker.add(ticker);
+    frameId = requestAnimationFrame(update);
 
     // Hover listener
     const onMouseOver = (e) => {
@@ -89,7 +86,7 @@ export default function CustomCursor() {
       window.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseover", onMouseOver);
       document.removeEventListener("mouseout", onMouseOut);
-      gsap.ticker.remove(ticker);
+      cancelAnimationFrame(frameId);
       document.documentElement.classList.remove("custom-cursor-active");
     };
   }, []);
@@ -101,21 +98,21 @@ export default function CustomCursor() {
       {/* Tiny Core Dot */}
       <div
         ref={cursorDotRef}
-        className="fixed top-0 left-0 w-2 h-2 bg-blue-400 rounded-full z-50 pointer-events-none -translate-x-1/2 -translate-y-1/2 mix-blend-difference"
+        className="fixed top-0 left-0 w-2.5 h-2.5 bg-blue-400 rounded-full z-[9999] pointer-events-none shadow-[0_0_8px_rgba(96,165,250,0.8)]"
       />
 
       {/* Trailing Globe */}
       <div
         ref={cursorGlobeRef}
-        className={`fixed top-0 left-0 flex items-center justify-center z-50 pointer-events-none -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
+        className={`fixed top-0 left-0 flex items-center justify-center z-[9999] pointer-events-none transition-all duration-300 ${
           isHovered
             ? "w-24 h-24 bg-blue-500/10 border border-blue-400/40 rounded-full backdrop-blur-[2px]"
-            : "w-10 h-10 border border-blue-400/20 rounded-full"
+            : "w-10 h-10 border border-blue-400/30 rounded-full"
         }`}
       >
         {/* Globe Grid lines (SVG) */}
         <svg
-          className={`absolute w-full h-full text-blue-400/30 animate-[spin_10s_linear_infinite] transition-opacity duration-300 ${
+          className={`absolute w-full h-full text-blue-400/40 animate-[spin_10s_linear_infinite] transition-opacity duration-300 ${
             isHovered ? "opacity-30 scale-125" : "opacity-100"
           }`}
           viewBox="0 0 100 100"
