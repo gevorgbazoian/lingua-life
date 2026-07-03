@@ -68,6 +68,7 @@ export default function PageLoader({ onComplete }) {
     });
 
     return () => {
+      tl.kill();
       document.body.style.overflow = "";
     };
   }, [onComplete]);

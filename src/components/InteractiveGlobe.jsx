@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
@@ -53,14 +53,20 @@ function createCurvePoints(start, end) {
 // Inner Scene Component for Three.js
 function GlobeScene({ activeIndex }) {
   const globeGroupRef = useRef(null);
-  const pointsRef = useRef(null);
   const linesGroupRef = useRef(null);
-  const [cityData, setCityData] = useState([]);
 
-  // Generate globe dots (Fibonacci sphere distribution)
-  useEffect(() => {
+  // Pre-calculate city coordinates synchronously to avoid state update lag
+  const cityData = useMemo(() => {
+    return CITIES.map((c) => {
+      const pos = latLongToVector3(c.lat, c.lon, GLOBE_RADIUS);
+      return { ...c, pos };
+    });
+  }, []);
+
+  // Pre-calculate dot-matrix coordinates synchronously using Fibonacci distribution
+  const dotsPositions = useMemo(() => {
     const dotsCount = 1800;
-    const positions = [];
+    const positions = new Float32Array(dotsCount * 3);
     const phi = Math.PI * (3 - Math.sqrt(5)); // golden angle in radians
 
     for (let i = 0; i < dotsCount; i++) {
@@ -68,24 +74,11 @@ function GlobeScene({ activeIndex }) {
       const radiusAtY = Math.sqrt(1 - y * y); // radius at y
       const theta = phi * i; // golden angle increment
 
-      const x = Math.cos(theta) * radiusAtY * GLOBE_RADIUS;
-      const z = Math.sin(theta) * radiusAtY * GLOBE_RADIUS;
-      positions.push(x, y * GLOBE_RADIUS, z * GLOBE_RADIUS);
+      positions[i * 3] = Math.cos(theta) * radiusAtY * GLOBE_RADIUS;
+      positions[i * 3 + 1] = y * GLOBE_RADIUS;
+      positions[i * 3 + 2] = Math.sin(theta) * radiusAtY * GLOBE_RADIUS;
     }
-
-    if (pointsRef.current) {
-      pointsRef.current.geometry.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(positions, 3)
-      );
-    }
-
-    // Initialize 3D Vector Positions for cities
-    const compiled = CITIES.map((c) => {
-      const pos = latLongToVector3(c.lat, c.lon, GLOBE_RADIUS);
-      return { ...c, pos };
-    });
-    setCityData(compiled);
+    return positions;
   }, []);
 
   // Animate rotation towards active city or base slow rotation
@@ -128,8 +121,13 @@ function GlobeScene({ activeIndex }) {
   return (
     <group ref={globeGroupRef}>
       {/* 1. Dot-Matrix Earth Sphere */}
-      <points ref={pointsRef}>
-        <bufferGeometry />
+      <points>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[dotsPositions, 3]}
+          />
+        </bufferGeometry>
         <pointsMaterial
           color="#60a5fa"
           size={0.035}
@@ -328,7 +326,12 @@ export default function InteractiveGlobe() {
           <ambientLight intensity={0.8} />
           <directionalLight position={[2, 5, 2]} intensity={1.5} />
           <GlobeScene activeIndex={activeIndex} />
-          <OrbitControls enableZoom={false} enablePan={false} rotateSpeed={0.5} />
+          <OrbitControls
+            enableZoom={false}
+            enablePan={false}
+            enableRotate={window.innerWidth > 768}
+            rotateSpeed={0.5}
+          />
         </Canvas>
       </div>
 

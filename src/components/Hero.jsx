@@ -133,7 +133,11 @@ export default function Hero() {
     // 1. Split Text into Letters and Gather them from different directions
     const titleText = titleRef.current;
     if (titleText) {
-      const words = titleText.textContent.split(" ");
+      // Explicitly reset the text to prevent double-splitting in React StrictMode
+      const originalText = "Speak Beyond Borders";
+      titleText.textContent = originalText;
+      
+      const words = originalText.split(" ");
       titleText.innerHTML = "";
       
       words.forEach((word) => {
