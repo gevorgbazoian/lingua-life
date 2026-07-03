@@ -128,9 +128,17 @@ export default function WhyLinguaLife() {
     const graphics = graphicGroupRef.current?.children;
 
     if (slides && graphics && slides[activeIndex] && graphics[activeIndex]) {
-      // Hide other slides
-      gsap.to(slides, { opacity: 0, y: 15, display: "none", duration: 0.2 });
-      gsap.to(graphics, { opacity: 0, scale: 0.9, display: "none", duration: 0.2 });
+      // Hide inactive slides and graphics (excluding activeIndex to avoid animation clashing)
+      Array.from(slides).forEach((slide, idx) => {
+        if (idx !== activeIndex) {
+          gsap.to(slide, { opacity: 0, y: 15, display: "none", duration: 0.2 });
+        }
+      });
+      Array.from(graphics).forEach((graphic, idx) => {
+        if (idx !== activeIndex) {
+          gsap.to(graphic, { opacity: 0, scale: 0.9, display: "none", duration: 0.2 });
+        }
+      });
 
       // Animate active slide in
       gsap.set(slides[activeIndex], { display: "block" });

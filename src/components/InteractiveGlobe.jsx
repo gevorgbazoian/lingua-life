@@ -224,27 +224,36 @@ export default function InteractiveGlobe() {
     const container = containerRef.current;
     if (!container) return;
 
-    // Create ScrollTrigger to step through cities
-    const trigger = ScrollTrigger.create({
-      trigger: container,
-      start: "top top",
-      end: "+=3000",
-      pin: true,
-      scrub: 0.5,
-      onUpdate: (self) => {
-        // Map progress (0 to 1) to city index (0 to 6)
-        const progress = self.progress;
-        const totalSteps = CITIES.length;
-        const step = Math.min(
-          totalSteps - 1,
-          Math.floor(progress * totalSteps)
-        );
-        setActiveIndex(step);
-      }
-    });
+    let scrollTrigger;
+    let ctx;
+
+    const timer = setTimeout(() => {
+      ctx = gsap.context(() => {
+        // Create ScrollTrigger to step through cities
+        scrollTrigger = ScrollTrigger.create({
+          trigger: container,
+          start: "top top",
+          end: "+=3000",
+          pin: true,
+          scrub: 0.5,
+          onUpdate: (self) => {
+            // Map progress (0 to 1) to city index (0 to 6)
+            const progress = self.progress;
+            const totalSteps = CITIES.length;
+            const step = Math.min(
+              totalSteps - 1,
+              Math.floor(progress * totalSteps)
+            );
+            setActiveIndex(step);
+          }
+        });
+      }, container);
+    }, 1200);
 
     return () => {
-      trigger.kill();
+      clearTimeout(timer);
+      if (scrollTrigger) scrollTrigger.kill();
+      if (ctx) ctx.revert();
     };
   }, []);
 
